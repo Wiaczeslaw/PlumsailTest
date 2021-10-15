@@ -25,7 +25,7 @@ namespace PlumsailTest.Logic.Services
             _db = context;
         }
         
-        public async Task<IEnumerable<FormModel>> GetListAsync(FormFilter filter)
+        public async Task<IEnumerable<ShortFormModel>> GetListAsync(FormFilter filter)
         {
             if (filter == null)
             {
@@ -47,7 +47,7 @@ namespace PlumsailTest.Logic.Services
                 queryable = queryable.Take(filter.Count);
             }
                
-            return await queryable.Select(FormModelSelector).ToArrayAsync();
+            return await queryable.Select(ShortFormModelSelector).ToArrayAsync();
 
         }
 
@@ -96,7 +96,9 @@ namespace PlumsailTest.Logic.Services
                 throw new AppBadRequestException(nameof(form), "Form cannot be empty");
             }
             
-            var formEntity = await _db.Forms.Where(x => x.Id == form.Id).FirstOrDefaultAsync();
+            var formEntity = await _db.Forms
+                .Include(x => x.FormItems)
+                .Where(x => x.Id == form.Id).FirstOrDefaultAsync();
             if (formEntity == null)
             {
                 throw new AppBadRequestException(nameof(form.Id), "Invalid id");
@@ -147,19 +149,24 @@ namespace PlumsailTest.Logic.Services
             {
                 Id = x.Id,
                 Name = x.Name,
+                TemplateId = x.FormTemplateId,
+                TemplateName = x.FormTemplate.Name,
                 Items = x.FormItems.Where(i => !i.IsDeleted).Select(i => new FormItemModel
                 {
                     Id = i.Id,
-                    Name = i.FormItemTemplate.Name,
-                    Order = i.FormItemTemplate.Order,
-                    Type = i.FormItemTemplate.Type,
+                    TemplateId = i.FormItemTemplateId,
                     Value = i.Value,
-                    SelectValue = new FormItemSelectValueModel
-                    {
-                        Id = i.FormItemSelectValue.Id,
-                        Value = i.FormItemSelectValue.Value
-                    }
+                    SelectValueId = i.FormItemSelectValueId
                 })
+            };
+        
+        private static readonly Expression<Func<Form, ShortFormModel>> ShortFormModelSelector = x =>
+            new ShortFormModel()
+            {
+                Id = x.Id,
+                Name = x.Name,
+                TemplateId = x.FormTemplateId,
+                TemplateName = x.FormTemplate.Name,
             };
     }
 }

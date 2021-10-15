@@ -27,7 +27,7 @@ namespace PlumsailTest.Controllers
             => Ok( await _templateService.GetAsync(id));
 
         [HttpGet("get/list")]
-        public async Task<IActionResult> GetListFormTemplate([FromBody] FormFilter form)
+        public async Task<IActionResult> GetListFormTemplate([FromQuery] FormFilter form)
             => Ok(await _templateService.GetListAsync(form));
         
         [HttpPost("create")]

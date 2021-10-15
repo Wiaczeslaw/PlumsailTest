@@ -17,7 +17,7 @@ namespace PlumsailTest.Logic.Services.Abstractions
         /// <summary>
         /// Get list Form by filter
         /// </summary>
-        Task<IEnumerable<FormModel>> GetListAsync(FormFilter filter);
+        Task<IEnumerable<ShortFormModel>> GetListAsync(FormFilter filter);
         
         /// <summary>
         /// Create new Form
